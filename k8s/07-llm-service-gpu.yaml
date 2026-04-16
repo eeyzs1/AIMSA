@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-service-gpu
+  namespace: aimsa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llm-service-gpu
+  template:
+    metadata:
+      labels:
+        app: llm-service-gpu
+    spec:
+      containers:
+        - name: llm-service
+          image: aimsa-llm:latest
+          ports:
+            - containerPort: 8001
+          env:
+            - name: DEVICE
+              value: "cuda"
+          resources:
+            requests:
+              cpu: "1"
+              memory: 4Gi
+              nvidia.com/gpu: 1
+            limits:
+              cpu: "4"
+              memory: 8Gi
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: huggingface-cache
+              mountPath: /root/.cache/huggingface
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 120
+            periodSeconds: 30
+      volumes:
+        - name: huggingface-cache
+          persistentVolumeClaim:
+            claimName: hf-cache-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hf-cache-pvc
+  namespace: aimsa
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

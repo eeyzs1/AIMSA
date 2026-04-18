@@ -16,9 +16,15 @@ TEST_PG_DB = os.environ.get("POSTGRES_DB", "aimsa_test")
 TEST_DB_URL = (
     f"postgresql+asyncpg://{TEST_PG_USER}:{TEST_PG_PASSWORD}"
     f"@{TEST_PG_HOST}:{TEST_PG_PORT}/{TEST_PG_DB}"
+    f"?ssl=disable"
 )
 
-test_engine = create_async_engine(TEST_DB_URL, echo=False, pool_pre_ping=True)
+test_engine = create_async_engine(
+    TEST_DB_URL,
+    echo=False,
+    pool_pre_ping=True,
+    connect_args={"server_settings": {"jit": "off"}},
+)
 test_session = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 

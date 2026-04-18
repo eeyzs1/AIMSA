@@ -69,10 +69,9 @@ jobs:
           REDIS_PORT: 6379
           MONGO_HOST: localhost
           LLM_SERVICE_URL: http://localhost:8001
-        run: python -m pytest tests/ -v 2>&1 | tee pytest-output.txt || true
-      - name: Check test results
-        working-directory: backend
         run: |
+          python -m pytest tests/ -v > pytest-output.txt 2>&1 || true
+          cat pytest-output.txt
           if grep -q "FAILED" pytest-output.txt; then
             echo "Tests FAILED"
             exit 1

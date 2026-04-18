@@ -57,10 +57,15 @@ jobs:
         run: |
           pip install -r backend/requirements.txt
           pip install pytest pytest-asyncio pytest-cov
-      - name: Debug test collection
+      - name: Debug environment
         run: |
+          echo "Python: $(python --version)"
+          echo "pytest: $(pytest --version)"
+          echo "PWD: $(pwd)"
           cd backend
-          python -m pytest tests/ --collect-only 2>&1 || true
+          echo "PWD after cd: $(pwd)"
+          python -c "import app; print('app import OK')"
+          python -c "import pytest_asyncio; print(f'pytest-asyncio {pytest_asyncio.__version__}')"
       - name: Run tests
         env:
           POSTGRES_HOST: localhost
@@ -74,7 +79,7 @@ jobs:
           LLM_SERVICE_URL: http://localhost:8001
         run: |
           cd backend
-          pytest tests/ -v --cov=app --cov-report=term-missing
+          pytest tests/ -v --cov=app --cov-report=term-missing --tb=short 2>&1
 
   build:
     runs-on: ubuntu-latest

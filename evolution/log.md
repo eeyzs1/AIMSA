@@ -112,3 +112,14 @@ and system limitations sometimes reshape requirements.
 - Verdict: adopted
 - Reason: root cause analysis showed 2 of 7 errors were functional gaps (metrics unused, settings unused), not just dead code. Fixing root causes instead of deleting code. CI Python version must match runtime environment (3.14).
 - Requirement Ref: docs/requirements.md Rev 2 → Rev 3
+
+## Evolution 8
+- Date: 2026-04-18
+- Type: system
+- Trigger: verification_failure (CI test job failed with exit code 4 after lint fix)
+- Scope: CI pipeline configuration, pytest configuration
+- Before: CI used setup-python@v5 (no Python 3.14 support); no pytest.ini (pytest-asyncio defaulted to strict mode causing collection errors); test step used `cd backend` in run block
+- After: CI upgraded to setup-python@v6; added pytest.ini with asyncio_mode=auto; test step uses working-directory directive; import blocks sorted per ruff isort rules
+- Impact: CI lint + test + build all pass
+- Verdict: adopted
+- Reason: setup-python@v5 could not install Python 3.14; pytest-asyncio strict mode rejected async tests without explicit @pytest.mark.asyncio; working-directory is more reliable than cd in run blocks

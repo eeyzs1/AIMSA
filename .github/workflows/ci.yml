@@ -69,7 +69,12 @@ jobs:
           REDIS_PORT: 6379
           MONGO_HOST: localhost
           LLM_SERVICE_URL: http://localhost:8001
-        run: python -m pytest tests/ -v --tb=long 2>&1
+        run: |
+          python -m pytest tests/ -v --tb=long 2>&1 | tee pytest-output.txt
+          echo "## Test Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat pytest-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   build:
     runs-on: ubuntu-latest

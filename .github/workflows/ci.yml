@@ -56,7 +56,13 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r backend/requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
+          pip install "pytest-asyncio>=0.23" pytest pytest-cov
+      - name: Verify environment
+        working-directory: backend
+        run: |
+          python -c "import pytest_asyncio; print(f'pytest-asyncio {pytest_asyncio.__version__}')"
+          python -c "from app.main import app; print('app import OK')"
+          python -m pytest --version
       - name: Run tests
         working-directory: backend
         env:

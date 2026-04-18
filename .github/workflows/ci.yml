@@ -69,9 +69,7 @@ jobs:
           REDIS_PORT: 6379
           MONGO_HOST: localhost
           LLM_SERVICE_URL: http://localhost:8001
-        run: |
-          set -o pipefail
-          python -m pytest tests/ -v --tb=short 2>&1 | tee pytest-output.txt
+        run: python -m pytest tests/ -v --tb=short
 
   build:
     runs-on: ubuntu-latest

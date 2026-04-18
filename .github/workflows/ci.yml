@@ -69,8 +69,7 @@ jobs:
           REDIS_PORT: 6379
           MONGO_HOST: localhost
           LLM_SERVICE_URL: http://localhost:8001
-        run: |
-          python -m pytest tests/ -v 2>&1; echo "PYTEST_EXIT=$?"
+        run: python -m pytest tests/ -v
 
   build:
     runs-on: ubuntu-latest

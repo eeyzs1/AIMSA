@@ -60,14 +60,22 @@ jobs:
       - name: Debug imports
         working-directory: backend
         run: |
-          python -c "import sys; print(sys.path)"
-          python -c "import chromadb; print(f'chromadb {chromadb.__version__}')"
-          python -c "import asyncpg; print(f'asyncpg {asyncpg.__version__}')"
-          python -c "from app.config import settings; print('config OK')"
-          python -c "from app.db.postgres import Base; print('postgres OK')"
-          python -c "from app.db.mongo import mongo_db; print('mongo OK')"
-          python -c "from app.db.vector import get_or_create_collection; print('vector OK')"
-          python -c "from app.main import app; print('app OK')"
+          echo "=== sys.path ==="
+          python -c "import sys; print(sys.path)" || true
+          echo "=== chromadb ==="
+          python -c "import chromadb; print(f'chromadb {chromadb.__version__}')" || true
+          echo "=== asyncpg ==="
+          python -c "import asyncpg; print(f'asyncpg {asyncpg.__version__}')" || true
+          echo "=== config ==="
+          python -c "from app.config import settings; print('config OK')" || true
+          echo "=== postgres ==="
+          python -c "from app.db.postgres import Base; print('postgres OK')" || true
+          echo "=== mongo ==="
+          python -c "from app.db.mongo import mongo_db; print('mongo OK')" || true
+          echo "=== vector ==="
+          python -c "from app.db.vector import get_or_create_collection; print('vector OK')" || true
+          echo "=== app ==="
+          python -c "from app.main import app; print('app OK')" || true
       - name: Run tests
         working-directory: backend
         env:

@@ -58,6 +58,7 @@ jobs:
           pip install -r backend/requirements.txt
           pip install pytest pytest-asyncio pytest-cov
       - name: Run tests
+        working-directory: backend
         env:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
@@ -68,10 +69,7 @@ jobs:
           REDIS_PORT: 6379
           MONGO_HOST: localhost
           LLM_SERVICE_URL: http://localhost:8001
-        run: |
-          cd backend
-          pytest tests/ -v --cov=app --cov-report=term-missing --tb=long 2>&1 || true
-          pytest tests/ -v --tb=long 2>&1; echo "EXIT_CODE=$?"
+        run: pytest tests/ -v --tb=short
 
   build:
     runs-on: ubuntu-latest

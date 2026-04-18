@@ -1,7 +1,5 @@
 import pytest
 
-from app.tasks.document_tasks import _chunk_text
-
 
 class TestDocumentAPI:
     @pytest.mark.asyncio

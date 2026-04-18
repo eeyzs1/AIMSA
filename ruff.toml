@@ -1,0 +1,11 @@
+target-version = "py314"
+line-length = 120
+
+[lint]
+select = ["E", "F", "W", "I"]
+
+[lint.isort]
+known-first-party = ["app"]
+
+[lint.per-file-ignores]
+"tests/**" = ["F811"]

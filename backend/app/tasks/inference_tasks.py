@@ -5,9 +5,10 @@ from app.tasks.celery_app import celery_app
 
 @celery_app.task(bind=True, max_retries=3)
 def answer_question_task(self, question_id: str, document_id: str, question: str):
+    import asyncio
+
     from app.db.postgres import async_session
     from app.services.rag_service import RAGService
-    import asyncio
 
     async def _answer():
         async with async_session() as db:

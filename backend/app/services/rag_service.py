@@ -2,13 +2,11 @@ import json
 import time
 
 import httpx
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.db.mongo import log_inference, log_metric
 from app.db.vector import get_or_create_collection
-from app.models.document import Question
 
 
 class RAGService:

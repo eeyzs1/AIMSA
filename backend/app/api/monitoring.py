@@ -29,12 +29,33 @@ async def get_stats():
 
     failure_count = await inference_logs.count_documents({"status": "failed"})
 
+    metrics_pipeline = [
+        {
+            "$group": {
+                "_id": "$service",
+                "count": {"$sum": 1},
+                "avg_latency": {"$avg": "$latency"},
+                "total_tokens": {"$sum": "$tokens"},
+            },
+        },
+    ]
+    metrics_result = await metrics.aggregate(metrics_pipeline).to_list(length=100)
+
+    services = {}
+    for r in metrics_result:
+        services[r["_id"]] = {
+            "count": r["count"],
+            "avg_latency": r.get("avg_latency", 0),
+            "total_tokens": r.get("total_tokens", 0),
+        }
+
     return {
         "total_inferences": total_inferences,
         "recent_inferences_1h": recent_inferences,
         "failure_count": failure_count,
         "avg_latency": latency_result[0]["avg_latency"] if latency_result else 0,
         "max_latency": latency_result[0]["max_latency"] if latency_result else 0,
+        "services": services,
     }
 
 

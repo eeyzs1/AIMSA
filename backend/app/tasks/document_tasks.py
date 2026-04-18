@@ -1,12 +1,12 @@
 import re
 import uuid
 
+from app.config import settings
 from app.db.vector import get_or_create_collection
 from app.tasks.celery_app import celery_app
-from app.config import settings
 
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 100
+CHUNK_SIZE = settings.CHUNK_SIZE
+CHUNK_OVERLAP = settings.CHUNK_OVERLAP
 
 
 def _read_file(file_path: str) -> str:
@@ -50,9 +50,10 @@ def _chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OV
 
 @celery_app.task(bind=True, max_retries=3)
 def process_document_task(self, document_id: str, file_path: str):
+    import asyncio
+
     from app.db.postgres import async_session
     from app.services.document_service import DocumentService
-    import asyncio
 
     async def _process():
         if file_path.lower().endswith(".pdf"):

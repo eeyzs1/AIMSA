@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "/data/uploads"
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024
 
+    CHUNK_SIZE: int = 500
+    CHUNK_OVERLAP: int = 100
+
     @property
     def postgres_url(self) -> str:
         return (

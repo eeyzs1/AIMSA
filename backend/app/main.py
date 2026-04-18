@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import documents, questions, monitoring
+from app.api import documents, monitoring, questions
 from app.db.postgres import init_db
 
 logger = logging.getLogger("aimsa")

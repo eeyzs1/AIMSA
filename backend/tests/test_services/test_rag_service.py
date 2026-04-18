@@ -1,5 +1,3 @@
-import pytest
-
 from app.tasks.document_tasks import _chunk_text
 
 

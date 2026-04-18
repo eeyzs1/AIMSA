@@ -1,3 +1,5 @@
+import os
+
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -5,9 +7,18 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.db.postgres import Base, get_db
 from app.main import app
 
-TEST_DB_URL = "postgresql+asyncpg://aimsa:aimsa_secret@localhost:5432/aimsa_test"
+TEST_PG_HOST = os.environ.get("POSTGRES_HOST", "localhost")
+TEST_PG_PORT = os.environ.get("POSTGRES_PORT", "5432")
+TEST_PG_USER = os.environ.get("POSTGRES_USER", "aimsa")
+TEST_PG_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "aimsa_secret")
+TEST_PG_DB = os.environ.get("POSTGRES_DB", "aimsa_test")
 
-test_engine = create_async_engine(TEST_DB_URL, echo=False)
+TEST_DB_URL = (
+    f"postgresql+asyncpg://{TEST_PG_USER}:{TEST_PG_PASSWORD}"
+    f"@{TEST_PG_HOST}:{TEST_PG_PORT}/{TEST_PG_DB}"
+)
+
+test_engine = create_async_engine(TEST_DB_URL, echo=False, pool_pre_ping=True)
 test_session = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 

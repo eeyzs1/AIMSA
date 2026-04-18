@@ -39,6 +39,24 @@ constraints:
     last_triggered: "2026-04-16"
     trigger_count: 1
 
+  - id: C006
+    rule: "all API endpoints must have rate limiting and configurable CORS"
+    source: "evolution 11 - wildcard CORS and no rate limiting"
+    last_triggered: "2026-04-18"
+    trigger_count: 1
+
+  - id: C007
+    rule: "health checks must verify actual dependency connectivity"
+    source: "evolution 9 - health check always returned healthy"
+    last_triggered: "2026-04-18"
+    trigger_count: 1
+
+  - id: C008
+    rule: "external service calls must have retry with backoff"
+    source: "evolution 10 - LLM call had no retry"
+    last_triggered: "2026-04-18"
+    trigger_count: 1
+
 workflows:
   - id: W001
     name: "base flow"
@@ -86,6 +104,6 @@ safety_constraints:
 ```
 
 ## Genome Version
-- Version: 2
-- Last evolved: 2026-04-16
-- Total mutations applied: 4
+- Version: 3
+- Last evolved: 2026-04-18
+- Total mutations applied: 8

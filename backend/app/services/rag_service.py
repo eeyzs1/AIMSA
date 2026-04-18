@@ -1,4 +1,6 @@
+import asyncio
 import json
+import logging
 import time
 
 import httpx
@@ -7,6 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.db.mongo import log_inference, log_metric
 from app.db.vector import get_or_create_collection
+
+logger = logging.getLogger("aimsa")
+
+LLM_MAX_RETRIES = 3
+LLM_RETRY_BACKOFF_BASE = 2
 
 
 class RAGService:
@@ -39,18 +46,29 @@ class RAGService:
         )
 
         start = time.time()
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            resp = await client.post(
-                f"{settings.LLM_SERVICE_URL}/generate",
-                json={"prompt": prompt, "max_tokens": 512},
-            )
-            resp.raise_for_status()
-            result = resp.json()
-        latency = time.time() - start
-
-        await log_metric("llm_inference", {"latency": latency, "tokens": result.get("tokens", 0)})
-
-        return result["text"]
+        last_exc = None
+        for attempt in range(LLM_MAX_RETRIES):
+            try:
+                async with httpx.AsyncClient(timeout=120.0) as client:
+                    resp = await client.post(
+                        f"{settings.LLM_SERVICE_URL}/generate",
+                        json={"prompt": prompt, "max_tokens": 512},
+                    )
+                    resp.raise_for_status()
+                    result = resp.json()
+                latency = time.time() - start
+                await log_metric("llm_inference", {"latency": latency, "tokens": result.get("tokens", 0)})
+                return result["text"]
+            except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException) as e:
+                last_exc = e
+                if attempt < LLM_MAX_RETRIES - 1:
+                    wait = LLM_RETRY_BACKOFF_BASE ** attempt
+                    logger.warning(
+                        f"LLM call failed (attempt {attempt + 1}/{LLM_MAX_RETRIES}), "
+                        f"retrying in {wait}s: {e}"
+                    )
+                    await asyncio.sleep(wait)
+        raise last_exc
 
     async def answer(self, question_id: str, document_id: str, question: str) -> dict:
         start = time.time()

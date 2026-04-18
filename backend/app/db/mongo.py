@@ -2,7 +2,14 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.config import settings
 
-mongo_client = AsyncIOMotorClient(settings.mongo_url)
+mongo_client = AsyncIOMotorClient(
+    settings.mongo_url,
+    maxPoolSize=20,
+    minPoolSize=5,
+    connectTimeoutMS=5000,
+    serverSelectionTimeoutMS=5000,
+    socketTimeoutMS=30000,
+)
 mongo_db = mongo_client[settings.MONGO_DB]
 
 

@@ -74,3 +74,12 @@ async def get_document(doc_id: str, db: AsyncSession = Depends(get_db)):
         chunk_count=doc.chunk_count,
         created_at=doc.created_at.isoformat(),
     )
+
+
+@router.delete("/{doc_id}")
+async def delete_document(doc_id: str, db: AsyncSession = Depends(get_db)):
+    svc = DocumentService(db)
+    deleted = await svc.delete_document(uuid.UUID(doc_id))
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return {"detail": "Document deleted", "id": doc_id}

@@ -57,9 +57,7 @@ jobs:
         run: |
           pip install -r backend/requirements.txt
           pip install "pytest-asyncio>=0.23" pytest
-      - id: run-tests
-        name: Run tests
-        continue-on-error: true
+      - name: Run tests
         working-directory: backend
         env:
           POSTGRES_HOST: localhost
@@ -71,7 +69,7 @@ jobs:
           REDIS_PORT: 6379
           MONGO_HOST: localhost
           LLM_SERVICE_URL: http://localhost:8001
-        run: python -m pytest tests/ -v -W ignore::DeprecationWarning 2>&1 | head -100
+        run: python -m pytest tests/ -v -W ignore::DeprecationWarning --tb=short -x
 
   build:
     runs-on: ubuntu-latest

@@ -123,3 +123,91 @@ and system limitations sometimes reshape requirements.
 - Impact: CI lint + test + build all pass
 - Verdict: adopted
 - Reason: setup-python@v5 could not install Python 3.14; pytest-asyncio on Python 3.14 returns non-zero exit code due to DeprecationWarnings in asyncio internals; tee captures output while || true prevents false failure; separate verify step checks actual test results
+
+## Evolution 9
+- Date: 2026-04-18
+- Type: system
+- Trigger: proactive
+- Scope: monitoring API health check endpoint
+- Before: /monitoring/health returned fixed {"status": "healthy"} without checking any dependencies
+- After: health check probes PostgreSQL, MongoDB, Redis, ChromaDB, and LLM service connectivity; returns "healthy" or "degraded" with per-service status
+- Impact: operators can now identify which dependency is down; K8s liveness/readiness probes get meaningful data
+- Verdict: adopted
+- Reason: a health check that always returns "healthy" is useless in production; real health checks must verify dependency connectivity
+
+## Evolution 10
+- Date: 2026-04-18
+- Type: system
+- Trigger: proactive
+- Scope: RAG service LLM call reliability
+- Before: single httpx call to LLM service with raise_for_status(); any network blip caused entire inference to fail
+- After: exponential backoff retry (3 attempts, 1s/2s/4s delays) for HTTPStatusError, ConnectError, TimeoutException
+- Impact: transient LLM service failures no longer propagate as failed inferences; only persistent failures (3 consecutive) result in failure
+- Verdict: adopted
+- Reason: distributed systems must tolerate transient failures; LLM service restarts or network hiccups should not waste an entire RAG pipeline execution
+
+## Evolution 11
+- Date: 2026-04-18
+- Type: system
+- Trigger: proactive
+- Scope: API security — CORS and rate limiting
+- Before: CORS allow_origins=["*"]; no rate limiting on any endpoint
+- After: CORS origins configurable via CORS_ORIGINS env var (comma-separated); RateLimitMiddleware added (default 60 req/min per IP, configurable via RATE_LIMIT_PER_MINUTE)
+- Impact: production deployments can restrict CORS to known origins; API abuse mitigated by rate limiting; new constraint C006 added to genome
+- Verdict: adopted
+- Reason: wildcard CORS and unlimited API access are unacceptable in production; rate limiting is a basic security requirement
+
+## Evolution 12
+- Date: 2026-04-18
+- Type: system
+- Trigger: proactive
+- Scope: document management — delete functionality
+- Before: no delete API; uploaded documents and their vectors could never be removed
+- After: DELETE /api/v1/documents/{doc_id} endpoint; cascading cleanup of physical file, ChromaDB vectors, and PG records (questions + document)
+- Impact: users can now clean up documents; storage no longer grows unboundedly; API route count increased from 13 to 14
+- Verdict: adopted
+- Reason: missing CRUD delete is a functional gap; production systems must support resource lifecycle management
+
+## Evolution 13
+- Date: 2026-04-18
+- Type: system
+- Trigger: proactive
+- Scope: MongoDB connection configuration
+- Before: AsyncIOMotorClient with default connection pool parameters (no explicit pool size, timeout, etc.)
+- After: explicit maxPoolSize=20, minPoolSize=5, connectTimeoutMS=5000, serverSelectionTimeoutMS=5000, socketTimeoutMS=30000
+- Impact: predictable connection pool behavior under load; connection timeouts prevent hanging on unavailable MongoDB
+- Verdict: adopted
+- Reason: default motor pool settings are unoptimized for production; explicit configuration prevents connection exhaustion and timeout issues
+
+## Evolution 14
+- Date: 2026-04-18
+- Type: system
+- Trigger: proactive
+- Scope: Kubernetes auto-scaling
+- Before: K8s manifests had resource limits but no HorizontalPodAutoscaler; manual scaling only
+- After: 10-hpa.yaml with HPA for backend (2-10 replicas, CPU 70%/memory 80%) and celery-worker (2-8 replicas, CPU 75%/memory 80%); scale-up/down stabilization windows configured
+- Impact: cluster auto-scales under load; no manual intervention needed for traffic spikes
+- Verdict: adopted
+- Reason: HPA is a core K8s operations capability; portfolio project must demonstrate auto-scaling knowledge
+
+## Evolution 15
+- Date: 2026-04-18
+- Type: system
+- Trigger: proactive
+- Scope: database backup and recovery
+- Before: no backup mechanism; data loss risk on PG/Mongo failure
+- After: scripts/backup.sh with pg_dump (custom format) and mongodump; timestamped backup directories; restore instructions printed on completion
+- Impact: operators can run periodic backups; disaster recovery possible
+- Verdict: adopted
+- Reason: backup/restore is a fundamental DBA responsibility; portfolio project must demonstrate operational readiness
+
+## Evolution 16
+- Date: 2026-04-18
+- Type: system
+- Trigger: verification_failure (CI pipeline consistently failing on GitHub)
+- Scope: CI pipeline, Dockerfiles, test configuration
+- Before: Dockerfiles used python:3.11.15 (version mismatch with CI Python 3.14); conftest.py hardcoded TEST_DB_URL; CI test step used `| head -100` causing SIGPIPE; CI test step had `continue-on-error: true` masking failures
+- After: All 3 Dockerfiles updated to python:3.14-slim; conftest.py reads DB connection from environment variables with pool_pre_ping; CI test step uses `--tb=short -x` (fail fast, no pipe truncation); removed `continue-on-error: true`
+- Impact: CI pipeline should now pass consistently; Docker images match CI Python version; test failures are properly surfaced
+- Verdict: adopted
+- Reason: three root causes — (1) python:3.11.15 tag may not exist or causes dependency conflicts with 3.14 code; (2) hardcoded DB URL prevents CI from using service containers; (3) pipe to head causes SIGPIPE which masks real test results

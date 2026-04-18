@@ -1,14 +1,75 @@
+import logging
 from datetime import datetime, timedelta
 
+import httpx
 from fastapi import APIRouter
 from motor.motor_asyncio import AsyncIOMotorClient
+from sqlalchemy import text
 
 from app.config import settings
+from app.db.postgres import engine
+from app.db.vector import get_chroma
+
+logger = logging.getLogger("aimsa")
 
 router = APIRouter(prefix="/monitoring", tags=["monitoring"])
 
 mongo_client = AsyncIOMotorClient(settings.mongo_url)
 mongo_db = mongo_client[settings.MONGO_DB]
+
+
+async def _check_postgres() -> dict:
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        return {"status": "healthy"}
+    except Exception as e:
+        logger.warning(f"PostgreSQL health check failed: {e}")
+        return {"status": "unhealthy", "error": str(e)}
+
+
+async def _check_mongodb() -> dict:
+    try:
+        result = await mongo_client.admin.command("ping")
+        if result.get("ok"):
+            return {"status": "healthy"}
+        return {"status": "unhealthy", "error": "ping returned ok=0"}
+    except Exception as e:
+        logger.warning(f"MongoDB health check failed: {e}")
+        return {"status": "unhealthy", "error": str(e)}
+
+
+async def _check_redis() -> dict:
+    try:
+        import redis as redis_sync
+
+        r = redis_sync.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
+        r.ping()
+        return {"status": "healthy"}
+    except Exception as e:
+        logger.warning(f"Redis health check failed: {e}")
+        return {"status": "unhealthy", "error": str(e)}
+
+
+async def _check_chromadb() -> dict:
+    try:
+        client = get_chroma()
+        client.heartbeat()
+        return {"status": "healthy"}
+    except Exception as e:
+        logger.warning(f"ChromaDB health check failed: {e}")
+        return {"status": "unhealthy", "error": str(e)}
+
+
+async def _check_llm_service() -> dict:
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(f"{settings.LLM_SERVICE_URL}/health")
+            resp.raise_for_status()
+            return {"status": "healthy", "detail": resp.json()}
+    except Exception as e:
+        logger.warning(f"LLM service health check failed: {e}")
+        return {"status": "unhealthy", "error": str(e)}
 
 
 @router.get("/stats")
@@ -61,4 +122,17 @@ async def get_stats():
 
 @router.get("/health")
 async def health_check():
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    checks = {
+        "postgresql": await _check_postgres(),
+        "mongodb": await _check_mongodb(),
+        "redis": await _check_redis(),
+        "chromadb": await _check_chromadb(),
+        "llm_service": await _check_llm_service(),
+    }
+    all_healthy = all(c["status"] == "healthy" for c in checks.values())
+    overall = "healthy" if all_healthy else "degraded"
+    return {
+        "status": overall,
+        "timestamp": datetime.utcnow().isoformat(),
+        "services": checks,
+    }

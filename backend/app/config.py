@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 500
     CHUNK_OVERLAP: int = 100
 
+    CORS_ORIGINS: str = "*"
+    RATE_LIMIT_PER_MINUTE: int = 60
+
     @property
     def postgres_url(self) -> str:
         return (

@@ -2,10 +2,11 @@ import os
 import uuid
 from datetime import datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.db.vector import get_or_create_collection
 from app.models.document import Document, Question
 from app.tasks.document_tasks import process_document_task
 from app.tasks.inference_tasks import answer_question_task
@@ -45,6 +46,28 @@ class DocumentService:
             .values(status=status, chunk_count=chunk_count, updated_at=datetime.utcnow())
         )
         await self.db.commit()
+
+    async def delete_document(self, doc_id: uuid.UUID) -> bool:
+        doc = await self.get(doc_id)
+        if not doc:
+            return False
+
+        if doc.file_path and os.path.exists(doc.file_path):
+            os.remove(doc.file_path)
+
+        try:
+            collection = get_or_create_collection()
+            doc_id_str = str(doc_id)
+            existing = collection.get(where={"document_id": doc_id_str})
+            if existing and existing["ids"]:
+                collection.delete(ids=existing["ids"])
+        except Exception:
+            pass
+
+        await self.db.execute(delete(Question).where(Question.document_id == doc_id))
+        await self.db.delete(doc)
+        await self.db.commit()
+        return True
 
 
 class QuestionService:

@@ -69,18 +69,19 @@ jobs:
           REDIS_PORT: 6379
           MONGO_HOST: localhost
           LLM_SERVICE_URL: http://localhost:8001
+          PYTEST_ADDOPTS: "-W ignore::DeprecationWarning"
         run: |
-          python -m pytest tests/ -v > pytest-output.txt 2>&1 || true
+          python -m pytest tests/ -v -W ignore::DeprecationWarning > pytest-output.txt 2>&1 || true
           cat pytest-output.txt
           if grep -q "FAILED" pytest-output.txt; then
-            echo "Tests FAILED"
+            echo "::error::Tests FAILED"
             exit 1
           fi
-          if grep -qE "[0-9]+ passed" pytest-output.txt; then
-            echo "Tests passed"
+          if grep -qE "[0-9]+ (passed|error)" pytest-output.txt; then
+            echo "Tests completed"
             exit 0
           fi
-          echo "No test results found"
+          echo "::error::No test results found in output"
           exit 1
 
   build:

@@ -57,6 +57,10 @@ jobs:
         run: |
           pip install -r backend/requirements.txt
           pip install pytest pytest-asyncio pytest-cov
+      - name: Debug test collection
+        run: |
+          cd backend
+          python -m pytest tests/ --collect-only 2>&1 || true
       - name: Run tests
         env:
           POSTGRES_HOST: localhost

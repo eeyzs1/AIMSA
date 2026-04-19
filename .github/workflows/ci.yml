@@ -68,7 +68,13 @@ jobs:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           MONGO_HOST: localhost
+          MONGO_PORT: 27017
+          MONGO_USER: aimsa
+          MONGO_PASSWORD: aimsa_secret
+          MONGO_DB: aimsa_logs
           LLM_SERVICE_URL: http://localhost:8001
+          CHROMA_MODE: ephemeral
+          UPLOAD_DIR: /tmp/aimsa_uploads
         run: python -m pytest tests/ -v -W ignore::DeprecationWarning --tb=short -x
 
   build:

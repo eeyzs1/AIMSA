@@ -53,6 +53,10 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq build-essential libpq-dev
       - name: Install dependencies
         run: |
           pip install -r backend/requirements.txt
@@ -75,7 +79,7 @@ jobs:
           LLM_SERVICE_URL: http://localhost:8001
           CHROMA_MODE: ephemeral
           UPLOAD_DIR: /tmp/aimsa_uploads
-        run: python -m pytest tests/ -v -W ignore::DeprecationWarning --tb=short -x
+        run: python -m pytest tests/ -v -W ignore::DeprecationWarning --tb=long -x 2>&1
 
   build:
     runs-on: ubuntu-latest

@@ -50,7 +50,7 @@ coverage.xml
 cover/
 
 **/datasets/
-**/models/
+ai_models/
 
 # Translations
 *.mo

@@ -73,7 +73,17 @@ jobs:
           POSTGRES_USER: aimsa
           POSTGRES_PASSWORD: aimsa_secret
           POSTGRES_DB: aimsa_test
-        run: python -c "import app.main; print('Import OK')"
+        run: |
+          echo "=== Python version ==="
+          python --version
+          echo "=== Installed packages ==="
+          pip list 2>/dev/null | grep -iE "fastapi|sqlalchemy|asyncpg|pydantic|motor|chromadb|celery|httpx"
+          echo "=== Testing imports ==="
+          python -c "import app.config; print('config OK:', app.config.settings.POSTGRES_DB)" 2>&1
+          python -c "import app.db.postgres; print('postgres OK')" 2>&1
+          python -c "import app.db.mongo; print('mongo OK')" 2>&1
+          python -c "import app.db.vector; print('vector OK')" 2>&1
+          python -c "import app.main; print('main OK')" 2>&1
       - name: Run tests
         working-directory: backend
         env:

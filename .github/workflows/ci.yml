@@ -78,6 +78,8 @@ jobs:
           python --version
           echo "=== Installed packages ==="
           pip list 2>/dev/null | grep -iE "fastapi|sqlalchemy|asyncpg|pydantic|motor|chromadb|celery|httpx"
+          echo "=== Directory structure ==="
+          find app/ -type f -name "*.py" | sort
           echo "=== Testing imports step by step ==="
           python -c "
           try:

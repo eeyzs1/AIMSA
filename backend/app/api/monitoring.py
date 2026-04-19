@@ -3,19 +3,16 @@ from datetime import datetime, timedelta
 
 import httpx
 from fastapi import APIRouter
-from motor.motor_asyncio import AsyncIOMotorClient
 from sqlalchemy import text
 
 from app.config import settings
+from app.db.mongo import get_mongo
 from app.db.postgres import engine
 from app.db.vector import get_chroma
 
 logger = logging.getLogger("aimsa")
 
 router = APIRouter(prefix="/monitoring", tags=["monitoring"])
-
-mongo_client = AsyncIOMotorClient(settings.mongo_url)
-mongo_db = mongo_client[settings.MONGO_DB]
 
 
 async def _check_postgres() -> dict:
@@ -30,7 +27,10 @@ async def _check_postgres() -> dict:
 
 async def _check_mongodb() -> dict:
     try:
-        result = await mongo_client.admin.command("ping")
+        from app.db.mongo import _get_mongo_client
+
+        client = _get_mongo_client()
+        result = await client.admin.command("ping")
         if result.get("ok"):
             return {"status": "healthy"}
         return {"status": "unhealthy", "error": "ping returned ok=0"}
@@ -54,7 +54,7 @@ async def _check_redis() -> dict:
 async def _check_chromadb() -> dict:
     try:
         client = get_chroma()
-        client.heartbeat()
+        client.list_collections()
         return {"status": "healthy"}
     except Exception as e:
         logger.warning(f"ChromaDB health check failed: {e}")
@@ -74,8 +74,9 @@ async def _check_llm_service() -> dict:
 
 @router.get("/stats")
 async def get_stats():
-    inference_logs = mongo_db.inference_logs
-    metrics = mongo_db.metrics
+    db = get_mongo()
+    inference_logs = db.inference_logs
+    metrics = db.metrics
 
     one_hour_ago = datetime.utcnow() - timedelta(hours=1)
 

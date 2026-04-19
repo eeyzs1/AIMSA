@@ -19,18 +19,22 @@ TEST_DB_URL = (
     f"?ssl=disable"
 )
 
-test_engine = create_async_engine(
-    TEST_DB_URL,
-    echo=False,
-    pool_pre_ping=True,
-    connect_args={"server_settings": {"jit": "off"}},
-)
-test_session = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+
+def _make_engine():
+    return create_async_engine(
+        TEST_DB_URL,
+        echo=False,
+        pool_pre_ping=True,
+        connect_args={"server_settings": {"jit": "off"}},
+    )
 
 
 async def override_get_db():
-    async with test_session() as session:
+    engine = _make_engine()
+    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with session_factory() as session:
         yield session
+    await engine.dispose()
 
 
 app.dependency_overrides[get_db] = override_get_db
@@ -38,11 +42,13 @@ app.dependency_overrides[get_db] = override_get_db
 
 @pytest_asyncio.fixture
 async def setup_db():
-    async with test_engine.begin() as conn:
+    engine = _make_engine()
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    async with test_engine.begin() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
 
 
 @pytest_asyncio.fixture

@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 class Settings(BaseSettings):
@@ -20,6 +24,7 @@ class Settings(BaseSettings):
 
     LLM_SERVICE_URL: str = "http://localhost:8001"
     CHROMA_PERSIST_DIR: str = "/data/chroma"
+    CHROMA_MODE: str = "persistent"
 
     UPLOAD_DIR: str = "/data/uploads"
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024
@@ -53,7 +58,7 @@ class Settings(BaseSettings):
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
     class Config:
-        env_file = ".env"
+        env_file = str(_PROJECT_ROOT / ".env")
 
 
 settings = Settings()

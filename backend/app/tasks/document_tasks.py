@@ -52,6 +52,9 @@ def _chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OV
 def process_document_task(self, document_id: str, file_path: str):
     import asyncio
 
+    from app.tasks.inference_tasks import _reset_async_singletons
+    _reset_async_singletons()
+
     from app.db.postgres import async_session
     from app.services.document_service import DocumentService
 
@@ -88,11 +91,6 @@ def process_document_task(self, document_id: str, file_path: str):
         return {"status": "ready", "chunk_count": len(chunks)}
 
     try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            return loop.run_until_complete(_process())
-        finally:
-            loop.close()
+        return asyncio.run(_process())
     except Exception as exc:
         raise self.retry(exc=exc, countdown=30)

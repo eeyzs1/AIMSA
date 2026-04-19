@@ -61,6 +61,19 @@ jobs:
         run: |
           pip install -r backend/requirements.txt
           pip install "pytest-asyncio>=0.23" pytest
+      - name: Verify imports
+        working-directory: backend
+        env:
+          CHROMA_MODE: ephemeral
+          UPLOAD_DIR: /tmp/aimsa_uploads
+          MONGO_HOST: localhost
+          MONGO_PORT: 27017
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: aimsa
+          POSTGRES_PASSWORD: aimsa_secret
+          POSTGRES_DB: aimsa_test
+        run: python -c "import app.main; print('Import OK')"
       - name: Run tests
         working-directory: backend
         env:

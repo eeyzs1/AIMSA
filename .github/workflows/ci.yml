@@ -78,12 +78,47 @@ jobs:
           python --version
           echo "=== Installed packages ==="
           pip list 2>/dev/null | grep -iE "fastapi|sqlalchemy|asyncpg|pydantic|motor|chromadb|celery|httpx"
-          echo "=== Testing imports ==="
-          python -c "import app.config; print('config OK:', app.config.settings.POSTGRES_DB)" 2>&1
-          python -c "import app.db.postgres; print('postgres OK')" 2>&1
-          python -c "import app.db.mongo; print('mongo OK')" 2>&1
-          python -c "import app.db.vector; print('vector OK')" 2>&1
-          python -c "import app.main; print('main OK')" 2>&1
+          echo "=== Testing imports step by step ==="
+          python -c "
+          try:
+              from app.config import settings
+              print('config OK, POSTGRES_DB=', settings.POSTGRES_DB)
+          except Exception as e:
+              print('::error::config import failed: ' + str(e)[:200])
+              raise
+          " 2>&1
+          python -c "
+          try:
+              import app.db.postgres
+              print('postgres OK')
+          except Exception as e:
+              print('::error::postgres import failed: ' + str(e)[:200])
+              raise
+          " 2>&1
+          python -c "
+          try:
+              import app.db.mongo
+              print('mongo OK')
+          except Exception as e:
+              print('::error::mongo import failed: ' + str(e)[:200])
+              raise
+          " 2>&1
+          python -c "
+          try:
+              import app.db.vector
+              print('vector OK')
+          except Exception as e:
+              print('::error::vector import failed: ' + str(e)[:200])
+              raise
+          " 2>&1
+          python -c "
+          try:
+              import app.main
+              print('main OK')
+          except Exception as e:
+              print('::error::main import failed: ' + str(e)[:200])
+              raise
+          " 2>&1
       - name: Run tests
         working-directory: backend
         env:

@@ -1,262 +1,18 @@
-# Harness Engineering Framework
-
-> Just say what you want. The system handles the rest.
-
-## What Is This?
-
-Imagine: you have an idea but don't know how to build it. You tell this system "I need a customer onboarding system", and it:
-
-1. **Understands your idea** — translates vague intent into a clear task definition
-2. **Designs how to work** — auto-generates rules, workflows, and checkpoints
-3. **Assigns specialist roles** — creates a team of AI agents, each with a specific job
-4. **Orchestrates execution** — plans who goes first, who goes next, who works in parallel
-5. **Verifies results** — automatically checks if output meets the bar
-6. **Gets smarter over time** — every mistake makes the system better
-7. **Self-evolves** — actively optimizes its own rules, workflows, and agent configurations; the evolution rules themselves also evolve
-
-**In one sentence**: This is an "evolving AI agent management system" — it ensures AI agents produce reliable work, and keeps getting more reliable.
-
----
-
-## How Do I Use It?
-
-### If You're Not a Developer
-
-You don't need to know code. Just open this project in an AI coding tool and tell it what you want.
-
-**Supported tools and context loading:**
-
-| Tool | Rules File | Loading | What You Need to Do |
-|------|-----------|---------|-------------------|
-| **Trae** | `AGENTS.md` | ✅ Auto-loaded | Just open the project |
-| **Claude Code** | `CLAUDE.md` | ✅ Auto-loaded | Just open the project |
-| **Cursor** | `.cursorrules` | ⚠️ Manual | Copy `AGENTS.md` contents to `.cursorrules` |
-| **Other AI tools** | — | ⚠️ Manual | Paste `AGENTS.md` contents into the conversation as context |
-
-**Critical: The AI MUST read the rules file to follow the pipeline.** If the AI doesn't read the rules, it will skip the pipeline and start working on its own — that's not what we want.
-
-**Examples — just say:**
-
-- "I need a customer onboarding system"
-- "Build me a competitor price monitoring tool"
-- "I want to automate our weekly report generation"
-- "Create a SaaS for freelance invoicing"
-
-The AI **automatically reads the project rules** (no manual action needed), then:
-- Parses your requirements
-- Generates constraints and workflows tailored to the task
-- Creates specialized agents to execute
-- Verifies the results meet your standards
-
-**You only need to do two things:**
-1. **Say what you want** (the vaguer, the better — the system will help you clarify)
-2. **Confirm assumptions** (the system will list its assumptions; just confirm or correct them)
-
-**Why will the AI follow the rules?** Because the rule files (`AGENTS.md` / `CLAUDE.md`) are auto-loaded by the AI IDE as "project rules" — the AI reads them before every conversation. These aren't suggestions — they're the AI's operating instructions.
-
-**What if the AI doesn't read the rules?** You'll notice the AI starts coding or planning immediately instead of asking you to confirm the task definition first. In that case, manually paste the contents of `AGENTS.md` into the conversation.
-
-### If You're a Software Engineer
-
-This project is a **self-bootstrapping meta-harness** — it's not a harness for a specific project, it's a **harness that generates harnesses**.
-
-**Core formula:**
-```
-Agent = Model + Harness
-```
-- The Model provides intelligence
-- The Harness makes that intelligence reliably useful
-- **A better Harness often matters more than a better Model**
-
-**Compilation pipeline:**
-```
-Vague Intent → [Interpreter] → Structured Task Definition
-                      ↓
-               [Harness Generator] → Constraints, Workflows, Skills
-                      ↓
-               [Agent Factory] → Specialized Agent Topology (generated, not selected)
-                      ↓
-               [Orchestrator] → Execution Plan
-                      ↓
-               Agents execute within generated harness → Results
-                      ↓
-               Failure feedback → Meta-Harness improves
-                      ↓
-               [Evolution] → Harness + Agents + Evolution Rules self-improve
-```
-
-**Quick start:**
-
-1. Open this project in Trae / Claude Code
-2. Tell the AI what you want (e.g., "I need a customer onboarding system")
-3. The AI auto-reads project rules and follows the pipeline
-4. Confirm the assumptions the AI lists
-5. The AI generates harness + agent configurations and executes
-
----
-
-## Project Structure
-
-```
-README.md           ← Chinese version
-README_EN.md        ← You are here
-AGENTS.md           ← ⚡ Auto-loaded project rules (Trae entry point)
-CLAUDE.md           ← ⚡ Auto-loaded project rules (Claude Code entry point)
-META.md             ← The system's DNA (full pipeline specification)
-│
-meta/               ← The four stages of the compilation pipeline
-  interpreter.md      Step 1: Intent → Structured Task
-  harness-generator.md Step 2: Task → Harness
-  agent-factory.md    Step 3: Harness → Agent Topology
-  orchestrator.md     Step 4: Agents → Execution Plan
-  examples/           Reference examples (not preset templates)
-    topologies.md       Agent topology examples
-│
-evolution/          ← Self-evolution system
-  framework.md        Evolution algorithm (genome, fitness, mutation, selection)
-  genome.md           Current evolvable state (what can mutate)
-  log.md              Evolution history (fossil record)
-│
-templates/          ← Domain templates (building blocks for generation)
-  web-app/            Web application
-  api-service/        API service
-  data-pipeline/      Data pipeline
-  content-system/     Content system
-  automation/         Automation
-│
-generated/          ← Generation output (result of each compilation)
-memory/             ← Meta-knowledge (cross-project, compounding over time)
-  generation-log.md   Every generation is tracked
-  meta-mistakes.md    Generation failures → pipeline improvements
-  task-patterns.md    Known task patterns (faster interpretation)
-  decisions.md        Architecture decision records
-  progress.md         Execution progress
-│
-scripts/            ← Verification and check scripts (bash: Linux/macOS/WSL)
-  verify-spec.md      Declarative: WHAT to check
-  verify.sh           Executable: HOW to check
-  pre-task.sh         Pre-task validation
-  quality-score.sh    Health metrics
-```
-
----
-
-## Key Concepts
-
-### What Is a Harness?
-
-A Harness is a **constraints + tools + verification** system built around AI agents. Just as a horse needs a harness to run in the right direction, AI agents need a harness to produce reliably.
-
-Without a harness: the agent might get it right, might get it wrong — you won't know which.
-With a harness: mistakes get caught, correct work gets verified, results are predictable.
-
-### Why a "Meta"-Harness?
-
-Regular harness: humans manually write rules → agents follow rules
-Meta-harness: humans provide intent → **the system auto-generates rules** → agents follow generated rules
-
-This means you don't need to manually set up infrastructure for each project — the system generates it based on your needs.
-
-### Why Do Mistakes Make the System Stronger?
-
-Every generation failure gets root-cause-analyzed and logged to `memory/meta-mistakes.md`, then the generation pipeline is improved. This creates a **compounding feedback loop**:
-
-```
-Mistake → Root Cause Analysis → Constraint Improvement → Better Future Generations → Fewer Mistakes
-```
-
-The more you use it, the smarter it gets. This is the fundamental difference from a traditional template library.
-
-### Agent Topology Is Dynamically Generated
-
-The system doesn't pick from 5 preset patterns. It **synthesizes** the optimal agent graph from task analysis:
-
-1. Identify work units (each constraint, workflow step, domain)
-2. Map dependencies
-3. Determine parallelism
-4. Assign roles (merge tightly coupled, split when context exceeds budget)
-5. Add verification layer (there must ALWAYS be an independent verifier)
-6. Define handoff points
-
-### The System Self-Evolves
-
-This is the most radical design. The system doesn't just learn from mistakes — it **actively optimizes itself**:
-
-**Three-layer genome (what can evolve):**
-- **Harness genome**: constraints, workflows, skills, verification rules
-- **Agent genome**: topology, role scope, handoff formats, context budgets
-- **Evolution genome** (meta-evolution): mutation operators, selection criteria, fitness weights, mutation rate
-
-**Evolution loop:**
-```
-Measure fitness → Propose mutation → Test mutation → Select or reject → Update genome
-                                                                    ↓
-                                                      Meta-evolution: update mutation/selection rules themselves
-```
-
-**Safety constraints (preventing "cancer" and "suicide"):**
-- Never remove the verification layer (otherwise the system accepts wrong results — "cancer")
-- Never remove the evolution system itself (otherwise the system stops evolving — "suicide")
-- Mutation rate never exceeds 30% (otherwise the system descends into chaos)
-- All mutations must be reversible (previous genome version is always preserved)
-
----
-
-## Verification Mechanism
-
-The system uses a **two-layer verification approach**:
-
-| Layer | File | Purpose |
-|---|---|---|
-| Declarative | `scripts/verify-spec.md` | Defines **WHAT to check** (platform-agnostic) |
-| Executable | `scripts/verify.sh` | Implements **HOW to check** (bash script) |
-
-AI agents read the declarative layer and translate checks to their current platform. Humans can run the scripts directly.
-
----
-
-## AI Agent Instructions
-
-<!-- AGENT-INSTRUCTION: If you are an AI agent, follow the instructions below. -->
-
-### You Are an AI Agent. Start Here.
-
-1. **Read `META.md`** — it contains the full compilation pipeline
-2. **Follow the pipeline stages in order:**
-   - `meta/interpreter.md` — parse user intent into a structured task
-   - `meta/harness-generator.md` — generate a task-specific harness
-   - `meta/agent-factory.md` — generate agent topology (from analysis, NOT from presets)
-   - `meta/orchestrator.md` — plan execution
-3. **Output goes to `generated/[project-name]/`**
-4. **Log every generation to `memory/generation-log.md`**
-5. **Log every failure to `memory/meta-mistakes.md`**
-
-### Mandatory Rules
-
-- No execution without interpretation — run the interpreter first
-- No agent without a harness — every agent operates within generated constraints
-- No constraint without a reason — every rule must trace to a task requirement
-- No completion without verification — run `scripts/verify.sh` after changes
-- Agent topology is GENERATED from task analysis, not selected from presets
-- Context files must stay under 60 lines
-- Evolution must never remove verification (cancer prevention)
-- Evolution must never remove itself (suicide prevention)
-- All mutations must be reversible
-
-### If You're Working in a Generated Project
-
-1. Read `generated/[project]/AGENTS.md` — that's the project-specific harness
-2. Follow the workflows defined there
-3. Stay within the constraints defined there
-4. Run verification after every change
-
----
-
-## AIMSA — System Architecture
+# AIMSA — Intelligent Document Q&A Platform (RAG)
 
 > AI Model Service Accelerator — Turn trained models into production-grade inference services in 5 minutes
 
-### Architecture Diagram
+[中文版本](README.md)
+
+## Product Positioning
+
+A portfolio project for AI full-stack engineers. Core scenario: **Upload document → Ask question → Get answer based on document content**.
+
+Why this product: The asynchronous nature of LLM inference naturally connects all skill points — frontend, backend, message queues, databases, AI inference, and quality assurance.
+
+---
+
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -288,9 +44,9 @@ AI agents read the declarative layer and translate checks to their current platf
 │ Port 5432│ │Port27017│ │(Memory)│ │  (Async Task Executor)    │
 │          │ │        │ │        │ │                            │
 │ Stores:  │ │Stores: │ │Stores: │ │  Handles 2 async tasks:   │
-│ · Doc    │ │·Infer. │ │·Doc    │ │  1.Document processing    │
+│ ·Doc     │ │·Infer. │ │·Doc    │ │  1.Document processing    │
 │   meta   │ │  logs  │ │  vectors│ │    (chunk + vectorize)    │
-│ · Q&A    │ │·Metrics│ │        │ │  2.Inference task         │
+│ ·Q&A     │ │·Metrics│ │        │ │  2.Inference task         │
 │   records│ │        │ │        │ │    (retrieve + generate)  │
 └──────────┘ └────────┘ └────────┘ └──────┬──────────┬──────────┘
                                             │          │
@@ -358,15 +114,86 @@ Frontend requests /api/v1/monitoring/health → Backend API →
   → Return health status of each component
 ```
 
-### Quick Start
+---
 
-#### Prerequisites
+## Project Structure
+
+```
+AIMSA/
+├── backend/                    # FastAPI backend
+│   ├── app/
+│   │   ├── main.py            # App entry, global exception handling
+│   │   ├── config.py          # Config management (pydantic-settings)
+│   │   ├── api/               # API route layer
+│   │   │   ├── documents.py   # Document upload/list/query
+│   │   │   ├── questions.py   # Question/answer/history
+│   │   │   └── monitoring.py  # Health check/stats
+│   │   ├── models/
+│   │   │   └── document.py    # SQLAlchemy models (6 indexes)
+│   │   ├── services/
+│   │   │   ├── document_service.py  # Document/question CRUD
+│   │   │   └── rag_service.py       # RAG core: retrieve + generate
+│   │   ├── tasks/
+│   │   │   ├── celery_app.py        # Celery config
+│   │   │   ├── document_tasks.py    # Document chunking + vectorization
+│   │   │   └── inference_tasks.py   # Async inference tasks
+│   │   └── db/
+│   │       ├── postgres.py    # PostgreSQL async connection
+│   │       ├── mongo.py       # MongoDB log storage
+│   │       └── vector.py      # ChromaDB vector storage
+│   ├── tests/                 # Tests
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── llm_service/               # LLM inference microservice (independently deployed)
+│   ├── server.py              # FastAPI + Qwen2.5-0.5B
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── frontend/                  # Streamlit frontend
+│   ├── app.py                 # Three-tab UI
+│   ├── .streamlit/
+│   │   └── secrets.toml       # Docker internal network config
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── k8s/                       # Kubernetes deployment manifests
+│   ├── 00-namespace-config.yaml  # Namespace + ConfigMap + Secret
+│   ├── 01-postgres.yaml          # PG StatefulSet + PVC + Service
+│   ├── 02-mongodb.yaml           # MongoDB StatefulSet + PVC + Service
+│   ├── 03-redis.yaml             # Redis Deployment + Service
+│   ├── 04-backend.yaml           # Backend Deployment(2 replicas) + Service
+│   ├── 05-celery-worker.yaml     # Celery Worker(2 replicas)
+│   ├── 06-llm-service.yaml       # LLM CPU version
+│   ├── 07-llm-service-gpu.yaml   # LLM GPU version (nvidia.com/gpu)
+│   ├── 08-frontend.yaml          # Frontend NodePort
+│   └── 09-canary.yaml            # Canary deployment Ingress
+│
+├── scripts/                   # Ops scripts
+│   ├── verify.sh              # 42-item automated verification
+│   ├── etl_inference_logs.py  # ETL: MongoDB → PostgreSQL
+│   ├── canary_deploy.py       # Canary deployment script
+│   └── benchmark.py           # Performance benchmarking
+│
+├── .github/workflows/
+│   └── ci.yml                 # CI: lint → test → build
+│
+├── docker-compose.yml         # One-click start 7 services
+├── start.sh                   # One-click startup script
+└── .env.example               # Environment variable template
+```
+
+---
+
+## Quick Start
+
+### Prerequisites
 
 - Docker + Docker Compose
 - Python 3.11+ (for local development)
 - HuggingFace cache with `Qwen/Qwen2.5-0.5B-Instruct` model (or network access to download)
 
-#### Method 1: One-Click Script (Recommended for Local Dev)
+### Method 1: One-Click Script (Recommended for Local Dev)
 
 ```bash
 # 1. Copy environment variables
@@ -391,7 +218,7 @@ cp .env.example .env
 > This allows code changes without rebuilding images.
 > The LLM service sets `HF_HUB_OFFLINE=1` to avoid network issues.
 
-#### Method 2: Docker Compose (All Containers)
+### Method 2: Docker Compose (All Containers)
 
 ```bash
 # 1. Copy environment variables
@@ -414,7 +241,7 @@ docker compose up --build -d
 >   The model loads lazily on the first inference request.
 > - All config is injected via environment variables: env vars > .env file > code defaults.
 
-#### Method 3: Manual Local Development
+### Method 3: Manual Local Development
 
 ```bash
 # 1. Install dependencies
@@ -444,12 +271,12 @@ API_BASE=http://localhost:8000/api/v1 streamlit run app.py \
 ```
 
 > **Note**:
-> - LLM service needs `HF_HUB_OFFLINE=1` if HuggingFace is unreachable
+> - LLM service needs `HF_HUB_OFFLINE=1` env var if HuggingFace is unreachable
 > - Frontend needs `API_BASE` env var or `.streamlit/secrets.toml` config
 > - Frontend needs `--server.headless true` to skip Streamlit welcome prompt
 > - All services read config from the project root `.env` file
 
-#### Method 4: Kubernetes (minikube Local Test)
+### Method 4: Kubernetes (minikube Local Test)
 
 ```bash
 # 1. Start minikube
@@ -479,3 +306,171 @@ minikube stop
 > - For production, push images to a registry and remove `imagePullPolicy: Never`.
 > - LLM service needs pre-cached model or a HuggingFace cache PVC.
 > - Image names updated: `aimsa-llm` → `aimsa-llm-service`, Redis version `7-alpine` → `8-alpine`.
+
+---
+
+## Usage Flow
+
+### 1. Upload Document
+
+Upload txt/md/pdf files in the "Document Management" tab. After receiving the file, the backend:
+- Saves to `UPLOAD_DIR`
+- Celery async task: read → chunk → vectorize → store in ChromaDB
+- Document status becomes `ready`
+
+### 2. Ask Question
+
+Select a ready document in the "Q&A" tab and enter a question:
+- Backend creates a Question record (status `pending`)
+- Celery async task: vector retrieval top-k chunks → construct prompt → LLM generates answer
+- Frontend polls for result and displays the answer
+
+### 3. Monitor
+
+View in the "Monitoring" tab:
+- Total inferences / inferences in last 1 hour
+- Average latency / maximum latency
+- Failure count
+
+---
+
+## Database Design
+
+### PostgreSQL — Structured Data
+
+**documents table:**
+| Column | Type | Index | Description |
+|---|---|---|---|
+| id | UUID | PK | Document ID |
+| filename | VARCHAR(255) | INDEX | File name |
+| content_type | VARCHAR(100) | | MIME type |
+| file_path | TEXT | | Storage path |
+| file_size | INTEGER | | File size |
+| status | ENUM | INDEX | uploaded/processing/ready/failed |
+| chunk_count | INTEGER | | Chunk count |
+| processing_error | TEXT | | Processing error message |
+| created_at | DATETIME | INDEX | Creation time |
+| updated_at | DATETIME | | Update time |
+
+**Composite index:** `(status, created_at)` — filter by status and sort by time
+
+**questions table:**
+| Column | Type | Index | Description |
+|---|---|---|---|
+| id | UUID | PK | Question ID |
+| document_id | UUID | INDEX + FK(CASCADE) | Associated document |
+| question | TEXT | | Question content |
+| answer | TEXT | | Answer content |
+| sources | JSONB | | Retrieval sources (JSON) |
+| status | ENUM | INDEX | pending/processing/completed/failed |
+| latency_ms | INTEGER | | Inference latency |
+| token_count | INTEGER | | Generated token count |
+| created_at | DATETIME | INDEX | Creation time |
+| completed_at | DATETIME | | Completion time |
+
+**Composite index:** `(document_id, status)` — query questions by document and filter by status
+
+### MongoDB — Unstructured Logs
+
+**inference_logs collection:**
+```json
+{
+  "task_id": "uuid",
+  "latency": 1.23,
+  "status": "completed",
+  "chunk_count": 5
+}
+```
+
+**metrics collection:**
+```json
+{
+  "service": "llm_inference",
+  "latency": 0.8,
+  "tokens": 128
+}
+```
+
+### ChromaDB — Vector Storage
+
+- Collection name: `documents`
+- Distance function: cosine
+- Metadata: `document_id`, `chunk_index`
+
+---
+
+## Ops Scripts
+
+### Automated Verification
+
+```bash
+bash scripts/verify.sh
+# 42 checks: syntax → imports → API routes → business logic → infrastructure → tests → OpenAPI
+```
+
+### ETL (MongoDB → PostgreSQL)
+
+```bash
+# Export last 24 hours of inference logs to PG analysis table
+python scripts/etl_inference_logs.py --since-hours 24
+
+# Preview mode (no write)
+python scripts/etl_inference_logs.py --dry-run
+```
+
+### Canary Deployment
+
+```bash
+# Deploy new LLM version, 10% canary traffic
+python scripts/canary_deploy.py --image aimsa-llm:v2 --weight 10
+
+# Full rollout (gradual 5%→10%→25%→50%→100%)
+python scripts/canary_deploy.py --image aimsa-llm:v2 --weight 100
+```
+
+### Performance Benchmarking
+
+```bash
+python scripts/benchmark.py --base-url http://localhost:8000 --requests 100
+# Output: RPS / P50 / P95 / P99 / Error rate
+```
+
+---
+
+## CI/CD
+
+GitHub Actions pipeline (`.github/workflows/ci.yml`):
+
+```
+push/PR → lint(ruff) → test(pytest + PG + Redis) → build(Docker images)
+```
+
+---
+
+## Tech Stack Overview
+
+| Layer | Technology | Why |
+|---|---|---|
+| Frontend | Streamlit | Python full-stack, rapid prototyping |
+| Backend | FastAPI | Async high performance, auto API docs |
+| Task Queue | Celery + Redis | Mature async task solution |
+| Relational DB | PostgreSQL | Indexes/transactions/JSONB |
+| Document DB | MongoDB | Flexible schema for logs |
+| Vector DB | ChromaDB | Lightweight local vector retrieval |
+| LLM | Qwen2.5-0.5B-Instruct | Small model for full pipeline validation |
+| Containerization | Docker Compose | Lightweight orchestration for dev |
+| Orchestration | Kubernetes | Production deployment + GPU scheduling |
+| CI/CD | GitHub Actions | Auto lint/test/build |
+
+---
+
+## Self-Evolution Record
+
+The project underwent 4 self-healing cycles during development (recorded in `evolution/log.md`):
+
+1. **DB crash** → Added global exception handler, 503 graceful degradation
+2. **asyncio.run()** → Switched to explicit event loop management
+3. **Long paragraphs not chunked** → Added forced splitting logic
+4. **Streamlit config missing** → Added secrets.toml
+
+Final verification: **42/42 automated checks passed**.

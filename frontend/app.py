@@ -1,7 +1,10 @@
+import os
+import time
+
 import httpx
 import streamlit as st
 
-API_BASE = st.secrets.get("API_BASE", "http://localhost:8000/api/v1")
+API_BASE = os.environ.get("API_BASE", st.secrets.get("API_BASE", "http://localhost:8000/api/v1"))
 
 st.set_page_config(page_title="AIMSA", page_icon="📄", layout="wide")
 st.title("📄 AIMSA - 智能文档问答")
@@ -30,6 +33,7 @@ with tab_docs:
                 files = {"file": (uploaded.name, uploaded.getvalue(), uploaded.type)}
                 result = api_post("/documents/", files=files)
                 st.success(f"上传成功! 文档ID: {result['id'][:8]}..., 状态: {result['status']}")
+                st.rerun()
             except Exception as e:
                 st.error(f"上传失败: {e}")
 
@@ -73,24 +77,27 @@ with tab_qa:
                         result = api_post("/questions/", json={"document_id": doc_id, "question": question})
                         q_id = result["id"]
 
-                        import time
-
+                        q = None
                         for _ in range(60):
                             time.sleep(2)
                             q = api_get(f"/questions/{q_id}")
                             if q["status"] in ("completed", "failed"):
                                 break
 
-                        if q["status"] == "completed":
+                        if q and q["status"] == "completed":
                             st.success("回答完成!")
                             st.markdown(f"**回答:** {q['answer']}")
-                        else:
+                        elif q and q["status"] == "failed":
                             st.error(f"处理失败: {q.get('answer', '未知错误')}")
+                        else:
+                            st.warning("处理超时，请稍后在历史问答中查看结果")
                     except Exception as e:
                         st.error(f"提问失败: {e}")
 
             st.divider()
             st.subheader("历史问答")
+            if st.button("刷新历史"):
+                st.rerun()
             try:
                 questions = api_get(f"/questions/by-document/{doc_id}")
                 for q in questions[:10]:
@@ -124,3 +131,7 @@ with tab_monitor:
         st.json(health)
     except Exception:
         st.error("后端服务不可达")
+
+    st.divider()
+    if st.button("刷新监控数据"):
+        st.rerun()

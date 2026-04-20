@@ -19,6 +19,7 @@ data:
   REDIS_PORT: "6379"
   LLM_SERVICE_URL: "http://llm-service:8001"
   CHROMA_PERSIST_DIR: "/data/chroma"
+  CHROMA_MODE: "persistent"
   UPLOAD_DIR: "/data/uploads"
 ---
 apiVersion: v1

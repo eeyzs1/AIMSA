@@ -16,6 +16,7 @@ spec:
       containers:
         - name: frontend
           image: aimsa-frontend:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8501
           env:

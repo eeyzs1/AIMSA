@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: "3.12"
       - name: Install linting tools
         run: pip install ruff
       - name: Lint backend
@@ -39,7 +39,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         ports:
           - 6379:6379
         options: >-
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: "3.12"
       - name: Install system dependencies
         run: |
           sudo apt-get update -qq
@@ -89,6 +89,6 @@ jobs:
       - name: Build backend image
         run: docker build -t aimsa-backend ./backend
       - name: Build llm-service image
-        run: docker build -t aimsa-llm ./llm_service
+        run: docker build -t aimsa-llm-service ./llm_service
       - name: Build frontend image
         run: docker build -t aimsa-frontend ./frontend

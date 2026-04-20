@@ -16,6 +16,7 @@ spec:
       containers:
         - name: celery-worker
           image: aimsa-backend:latest
+          imagePullPolicy: Never
           command: ["celery", "-A", "app.tasks.celery_app:celery_app", "worker", "--loglevel=info", "--concurrency=2"]
           envFrom:
             - configMapRef:

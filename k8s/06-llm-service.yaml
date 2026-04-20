@@ -15,9 +15,23 @@ spec:
     spec:
       containers:
         - name: llm-service
-          image: aimsa-llm:latest
+          image: aimsa-llm-service:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8001
+          env:
+            - name: MODEL_NAME
+              value: "Qwen/Qwen2.5-0.5B-Instruct"
+            - name: DEVICE
+              value: "cpu"
+            - name: TORCH_DTYPE
+              value: "float32"
+            - name: HF_HUB_OFFLINE
+              value: "1"
+            - name: TRANSFORMERS_OFFLINE
+              value: "1"
+            - name: HF_HOME
+              value: "/root/.cache/huggingface"
           resources:
             requests:
               cpu: "1"

@@ -1,34 +1,68 @@
+import logging
+import os
 import time
 from contextlib import asynccontextmanager
 
 import torch
 from fastapi import FastAPI
 from pydantic import BaseModel
+from pydantic_settings import BaseSettings
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logger = logging.getLogger("llm_service")
+
+
+class LLMSettings(BaseSettings):
+    MODEL_NAME: str = "Qwen/Qwen2.5-0.5B-Instruct"
+    DEVICE: str = "cpu"
+    TORCH_DTYPE: str = "float32"
+    MAX_TOKENS: int = 512
+    TEMPERATURE: float = 0.7
+
+    class Config:
+        env_file = os.path.join(os.path.dirname(__file__), "..", ".env")
+        extra = "ignore"
+
+
+llm_settings = LLMSettings()
+
+DTYPE_MAP = {"float32": torch.float32, "float16": torch.float16, "bfloat16": torch.bfloat16}
 
 tokenizer = None
 model = None
+model_loaded = False
 
 
 def load_model():
-    global tokenizer, model
+    global tokenizer, model, model_loaded
     if tokenizer is None:
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
+        print(f"[llm_service] Loading model {llm_settings.MODEL_NAME} on {llm_settings.DEVICE}...")
+        tokenizer = AutoTokenizer.from_pretrained(
+            llm_settings.MODEL_NAME, trust_remote_code=True, local_files_only=True
+        )
+        dtype = DTYPE_MAP.get(llm_settings.TORCH_DTYPE, torch.float32)
         model = AutoModelForCausalLM.from_pretrained(
-            MODEL_NAME,
-            torch_dtype=torch.float32,
-            device_map="cpu",
+            llm_settings.MODEL_NAME,
+            dtype=dtype,
+            device_map=llm_settings.DEVICE,
             trust_remote_code=True,
+            local_files_only=True,
         )
         model.eval()
+        model_loaded = True
+        print("[llm_service] Model loaded successfully")
     return tokenizer, model
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    load_model()
+    try:
+        load_model()
+    except Exception as e:
+        print(f"[llm_service] Failed to load model during startup: {e}")
+        import traceback
+        traceback.print_exc()
     yield
 
 
@@ -74,4 +108,9 @@ async def generate(req: GenerateRequest):
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "model": MODEL_NAME, "device": "cpu"}
+    return {
+        "status": "healthy" if model_loaded else "loading",
+        "model": llm_settings.MODEL_NAME,
+        "device": llm_settings.DEVICE,
+        "model_loaded": model_loaded,
+    }

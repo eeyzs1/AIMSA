@@ -61,6 +61,7 @@ services:
       REDIS_PORT: 6379
       LLM_SERVICE_URL: http://llm-service:8001
       CHROMA_PERSIST_DIR: /data/chroma
+      CHROMA_MODE: persistent
       UPLOAD_DIR: /data/uploads
     volumes:
       - appdata:/data
@@ -90,6 +91,7 @@ services:
       REDIS_PORT: 6379
       LLM_SERVICE_URL: http://llm-service:8001
       CHROMA_PERSIST_DIR: /data/chroma
+      CHROMA_MODE: persistent
       UPLOAD_DIR: /data/uploads
     volumes:
       - appdata:/data
@@ -103,8 +105,15 @@ services:
     build: ./llm_service
     ports:
       - "8001:8001"
+    environment:
+      MODEL_NAME: Qwen/Qwen2.5-0.5B-Instruct
+      DEVICE: cpu
+      TORCH_DTYPE: float32
+      HF_HOME: /root/.cache/huggingface
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
     volumes:
-      - huggingface_cache:/root/.cache/huggingface
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
 
   frontend:
     build: ./frontend
@@ -119,4 +128,3 @@ volumes:
   pgdata:
   mongodata:
   appdata:
-  huggingface_cache:

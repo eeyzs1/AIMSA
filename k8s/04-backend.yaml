@@ -16,6 +16,7 @@ spec:
       containers:
         - name: backend
           image: aimsa-backend:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8000
           envFrom:
